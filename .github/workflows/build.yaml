@@ -2,8 +2,9 @@ name: Build NyanCat Apps
 
 on:
   push:
-    tags:
-      - 'v*' # Startet den Build, wenn du einen Tag wie v1.0 pushst
+    branches:
+      - main  # Ersetze dies durch 'master', falls dein Branch so heißt
+  workflow_dispatch: # Erlaubt es dir, den Build manuell auf GitHub zu starten
 
 jobs:
   build:
@@ -31,12 +32,14 @@ jobs:
 
       - name: Build with PyInstaller (Windows)
         if: matrix.os == 'windows-latest'
-        run: pyinstaller --onefile --noconsole --icon=icon.ico --name="NyanCat" nyan_app.py
+        run: |
+          # Erstellt die EXE. Falls icon.ico fehlt, wird dieser Schritt übersprungen oder schlägt fehl.
+          pyinstaller --onefile --noconsole --icon=icon.ico --name="NyanCat" nyan_app.py
 
       - name: Build with PyInstaller (macOS)
         if: matrix.os == 'macos-latest'
-        run: pyinstaller --windowed --noconsole --icon=icon.icns --name="NyanCat" nyan_app.py
-        # Hinweis: macOS benötigt ein .icns Format für Icons!
+        run: |
+          pyinstaller --windowed --noconsole --name="NyanCat" nyan_app.py
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
