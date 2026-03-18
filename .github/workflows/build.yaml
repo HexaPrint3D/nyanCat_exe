@@ -1,0 +1,45 @@
+name: Build NyanCat Apps
+
+on:
+  push:
+    tags:
+      - 'v*' # Startet den Build, wenn du einen Tag wie v1.0 pushst
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            output_name: NyanCat.exe
+          - os: macos-latest
+            output_name: NyanCat.app
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install pywebview pyinstaller
+
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: pyinstaller --onefile --noconsole --icon=icon.ico --name="NyanCat" nyan_app.py
+
+      - name: Build with PyInstaller (macOS)
+        if: matrix.os == 'macos-latest'
+        run: pyinstaller --windowed --noconsole --icon=icon.icns --name="NyanCat" nyan_app.py
+        # Hinweis: macOS benötigt ein .icns Format für Icons!
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build
+          path: dist/NyanCat*
